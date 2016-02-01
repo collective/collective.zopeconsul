@@ -1,0 +1,24 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:zcml="http://namespaces.zope.org/zcml">
+
+  <include package="Products.CMFPlone" file="meta.zcml"
+           zcml:condition="installed Products.CMFPlone"/>
+<!--
+  <subscriber
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot
+           zope.traversing.interfaces.IBeforeTraverseEvent"
+      handler=".handlers.setLanguageBindings"
+      zcml:condition="not-have plone-5"
+      />
+      -->
+
+<include package="collective.monkeypatcher" />
+
+    <monkey:patch
+        description="No events fired by VHM so we have to monkeypatch"
+        class="Products.SiteAccess.VirtualHostMonster"
+        original="set_map"
+        replacement=".zopeconsul.set_map"
+        />
+
+</configure>
