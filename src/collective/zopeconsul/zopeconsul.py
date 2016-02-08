@@ -1,23 +1,14 @@
 # -*- coding: utf-8 -*-
-from AccessControl import getSecurityManager
-from Queue import Empty
-from Queue import Queue
-from collective.zopeconsul.interfaces import ITaskQueue
-from plone.memoize import forever
+from zope.app.publication.zopepublication import ZopePublication
+from zope.component.hooks import getSite
+import os
+import urllib
+from urlparse import urlsplit
 from transaction import get as get_transaction
 from transaction.interfaces import ISavepoint
 from transaction.interfaces import ISavepointDataManager
-from zope.component import ComponentLookupError
-from zope.component import getUtilitiesFor
-from zope.component import getUtility
-from zope.globalrequest import getRequest
 from zope.interface import implements
-from zope.schema.interfaces import IVocabularyFactory
-from zope.schema.vocabulary import SimpleVocabulary
 import logging
-import urllib
-import urlparse
-import uuid
 import consul
 
 logger = logging.getLogger('collective.zopeconsul')
@@ -43,8 +34,7 @@ class ConsulSendTransactionDataManager(object):
 
     _COUNTER = 0
 
-    def __init__(self, queue, task):
-        self.queue = queue
+    def __init__(self, task):
         self.task = task
 
         self.sort_key = '~collective.zopeconsul.{0:d}'.format(
@@ -67,7 +57,7 @@ class ConsulSendTransactionDataManager(object):
         pass
 
     def tpc_finish(self, t):
-        self.queue.put(self.task)
+        self.task()
 
     def tpc_abort(self, t):
         pass
@@ -81,14 +71,14 @@ class ConsulConfigSender(object):
     transaction_data_manager = ConsulSendTransactionDataManager
 
 
-    def add(self, url=None, method='GET', params=None, headers=None,
-            payload=_marker):
-        task = lambda: send_vhm(url, host_map, platform)
-        get_transaction().join(self.transaction_data_manager(self, task))
-        return task_id
+    def send_vhm(self, host_map, platform="zope"):
+        #TODO: get from zope config
+        task = lambda: send_vhm(host_map, platform)
+        get_transaction().join(self.transaction_data_manager(task))
+        return
 
 
-def send_vhm(url, host_map, platform):
+def send_vhm(host_map, platform="zope"):
     """We have to remap the VHM into something a bit more useful to a consul template"
     We are given hostmap[host][port] = path
     We will push to consul on each startup and VHM modifcation
@@ -98,16 +88,27 @@ def send_vhm(url, host_map, platform):
     Platform could be automatic based on hash of VHM or ZODB connections or some
     other unique aspect. Maybe a name stored in the root?
     """
-    c = consul.Consul(url)
+    from App.config import getConfiguration
+    config = getConfiguration()
+    url = os.environ.get('CONSUL_URL', 'http://localhost:8500')
+    if url is not None:
+        r =  urlsplit(url)
+        c = consul.Consul(scheme=r.scheme, host=r.hostname, port=r.port)
+    else:
+        c = consul.Consul()
 
     prefix = "zope/vhm/"+platform
 
     old_values = c.kv.get('zope/vhm', recurse=True)
     c.kv.delete('zope/vhm', recurse=True)
+    count = 0
+    logger.debug(host_map)
     for host, ports in host_map.items():
         for port, path in ports.items():
             value = str( (host, port, None, path))
             c.kv.put("%s/%s:%s" % (prefix, host, port), value)
+            count += 1
+    logger.info("Updated consul %s with %i values" % (url, count))
 
 
 
@@ -115,5 +116,13 @@ def send_vhm(url, host_map, platform):
 # need to monkey patch VHM as there are no events
 
 def set_map(self, map_text, RESPONSE=None):
-    res = self.__monkey__set_map(map_text, RESPONSE)
-    ConsulConfigSender().send_vhm(self.sub_map)
+    res = self._old_set_map(map_text, RESPONSE)
+    ConsulConfigSender().send_vhm(self.fixed_map)
+
+def notifyStartup(event):
+    db = event.database
+    connection = db.open()
+    root = connection.root()
+    root_folder = root.get(ZopePublication.root_name)
+    vhm = root_folder.virtual_hosting
+    send_vhm(vhm.fixed_map)

@@ -5,10 +5,15 @@ collective.zopeconsul
    :target: http://travis-ci.org/collective/collective.zopeconsul
 
 *collective.zopeconsul* enables asynchronous sending of zope configuration
-to consul. To start with it sends the VHM domain information to consul along
+to consul. It sends the VHM domain information to consul along
 with port and ip address of this instance.
 
 Minimal configuration:
+
+.. code:: ini
+  $ export CONSUL_URL=http://localhost:8500
+
+or (TODO)
 
 .. code:: ini
 

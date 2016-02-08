@@ -36,7 +36,7 @@ setup(
         'Zope2',
         'five.globalrequest',
         'python-consul',
-        'collective.monkeypatch'
+        'collective.monkeypatcher'
     ],
     extras_require={
         'test': ['plone.app.testing', 'plone.app.robotframework>=0.7.0rc4'],
