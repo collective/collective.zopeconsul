@@ -2,32 +2,21 @@
            xmlns:monkey="http://namespaces.plone.org/monkey"
            xmlns:zcml="http://namespaces.zope.org/zcml">
 
-  <include package="Products.CMFPlone" file="meta.zcml"
-           zcml:condition="installed Products.CMFPlone"/>
-<!--
-  <subscriber
-      for="Products.CMFPlone.interfaces.IPloneSiteRoot
-           zope.traversing.interfaces.IBeforeTraverseEvent"
-      handler=".handlers.setLanguageBindings"
-      zcml:condition="not-have plone-5"
-      />
-      -->
+    <include package="Products.CMFPlone" file="meta.zcml"
+             zcml:condition="installed Products.CMFPlone"/>
 
-<include package="collective.monkeypatcher" />
-
+    <include package="collective.monkeypatcher" />
     <monkey:patch
         description="No events fired by VHM so we have to monkeypatch"
         class="Products.SiteAccess.VirtualHostMonster.VirtualHostMonster"
         original="set_map"
-        replacement=".zopeconsul.set_map"
+        replacement=".vhm.set_map"
         preserveOriginal="True"
         />
 
-<subscriber
+    <subscriber
         for="zope.processlifetime.IDatabaseOpenedWithRoot"
-        handler=".zopeconsul.notifyStartup"
-   />
-
-
+        handler=".startup.notifyStartup"
+        />
 
 </configure>

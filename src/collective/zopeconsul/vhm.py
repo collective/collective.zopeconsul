@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
-import os
-from urlparse import urlsplit
 
-import consul
+from consulserver import Consul
 from transaction import get as get_transaction
 from transaction.interfaces import ISavepoint, ISavepointDataManager
 from zope.app.publication.zopepublication import ZopePublication
@@ -69,47 +67,28 @@ class ConsulConfigSender(object):
     transaction_data_manager = ConsulSendTransactionDataManager
 
     def send_vhm(self, host_map):
-        # TODO: get from zope config
         task = lambda: send_vhm(host_map)
         get_transaction().join(self.transaction_data_manager(task))
         return
 
 
-def send_vhm(host_map):
+def send_vhm(host_map, consul=None):
     """
     We have to remap the VHM into something a bit more useful to a consul
     template.
     We are given hostmap[host][port] = path
-    We will push to consul on each startup and VHM modifcation
-        zope/vhm/*platform*/*host:port* -> host, port, regex, path
     It will remove any old hosts.
-
-    Platform could be automatic based on hash of VHM or ZODB connections or
-    some other unique aspect. Maybe a name stored in the root?
     """
-    # from App.config import getConfiguration
-    # config = getConfiguration()
-    url = os.environ.get('CONSUL_URL', 'http://localhost:8500')
-    if url is not None:
-        r = urlsplit(url)
-        c = consul.Consul(scheme=r.scheme, host=r.hostname, port=r.port)
-    else:
-        c = consul.Consul()
-
-    # Get the platform name, using the env INSTANCE NAME
-    platform = os.environ.get('INSTANCE_NAME', 'zope')
-    logger.info('Platform: %s' % platform)
-    prefix = "zope/vhm/%s/" % platform
-
-    old_values = c.kv.get(prefix, recurse=True)
+    if consul is None:
+        consul = Consul()
+    server = consul.server
+    vhm = consul.key_base('vhm')
+    old_values = server.kv.get(vhm, recurse=True)
     if old_values:
-        c.kv.delete(prefix, recurse=True)
-    count = 0
+        server.kv.delete(vhm, recurse=True)
     for host in host_map:
         for nothing, values in host_map[host].items():
-            c.kv.put('%s%s' % (prefix, host), '%s' % '/'.join(values))
-        count += 1
-    logger.info("Updated consul %s with %i values" % (url, count))
+            server.kv.put('%s/%s' % (vhm, host), '%s' % '/'.join(values))
 
 
 # need to monkey patch VHM as there are no events
@@ -118,11 +97,11 @@ def set_map(self, map_text, RESPONSE=None):
     ConsulConfigSender().send_vhm(self.fixed_map)
 
 
-def notifyStartup(event):
+def set_vhm(event, consul):
     db = event.database
     connection = db.open()
     root = connection.root()
     root_folder = root.get(ZopePublication.root_name)
     vhm = root_folder.virtual_hosting
     if hasattr(vhm, 'fixed_map'):
-        send_vhm(vhm.fixed_map)
+        send_vhm(vhm.fixed_map, consul=consul)
