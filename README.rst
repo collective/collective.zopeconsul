@@ -17,20 +17,22 @@ zopeconsul can be configured by adding the following to your buildout:
 
 .. code:: ini
 
-   zope-conf-additional =
-   [instance]
-       <product-config zopeconsul>
-           consul_url http://localhost:8500
-           consul_prefix zope
-           consul_key_somename somevalue
-       </product-config>
+  [instance]
+  eggs = collective.zopeconsul
+
+  zope-conf-additional =
+    <product-config zopeconsul>
+      consul_url http://localhost:8500
+      consul_prefix zope
+      consul_key_somename somevalue
+    </product-config>
 
 Any configuration option can be overridden by an environment variable:
 
 .. code:: ini
 
   $ export CONSUL_URL=http://localhost:8500
-  # export CONSUL_KEY_SOMENAME=somevalue
+  $ export CONSUL_KEY_SOMENAME=somevalue
 
 Configuration options
 ---------------------
