@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='collective.zopeconsul',
-    version='0.1.dev0',
+    version='0.1',
     description='Asynchronous updating of consul with zope configration',
     long_description=(open('README.rst').read() + '\n' +
                       open('CHANGES.txt').read()),
