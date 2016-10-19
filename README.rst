@@ -49,3 +49,8 @@ consul_instancename
 
 consul_key_[name]
     Allows to set arbitrary key values with any name. *Example: ``consul_key_somekey = somevalue``*
+
+consul_ignore
+    Skips setting consul key values. Useful if you have multiple instances that
+    share the same code. You can set this value on specific instnaces and no
+    key/values will be set in consul.
