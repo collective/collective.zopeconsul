@@ -81,6 +81,10 @@ def send_vhm(host_map, consul=None):
     """
     if consul is None:
         consul = Consul()
+    if consul.ignore:
+        logger.info('Not setting vhm values in consul (CONSUL_IGNORE = 1)')
+        return
+    logger.info('Setting consul vhm values')
     server = consul.server
     vhm = consul.key_base('vhm')
     old_values = server.kv.get(vhm, recurse=True)
