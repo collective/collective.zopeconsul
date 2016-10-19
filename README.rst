@@ -52,5 +52,5 @@ consul_key_[name]
 
 consul_ignore
     Skips setting consul key values. Useful if you have multiple instances that
-    share the same code. You can set this value on specific instnaces and no
+    share the same code. You can set this value on specific instances and no
     key/values will be set in consul.
