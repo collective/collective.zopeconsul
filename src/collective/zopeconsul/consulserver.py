@@ -20,6 +20,7 @@ class Consul(object):
                                     port=r.port)
         self.instance = self.getconf('consul_instancename', None)
         self.prefix = self.getconf('consul_prefix', 'zope/')
+        self.ignore = self.getconf('consul_ignore', 0)
 
     def getconf(self, name, default=None):
         value = os.environ.get(name.upper(), None)
@@ -46,6 +47,11 @@ def set_keyvalues(event, consulsrv):
     """ Set any key values starting with CONSUL_KEY_
         Start with values from the configuration, then override with env vars.
     """
+    if consulsrv.ignore:
+        logger.info("Not setting any consul values (CONSUL_IGNORE = 1)")
+        return
+
+    logger.info('Setting consul values')
     values = {}
     for i in consulsrv.conf.keys():
         if i.startswith('consul_key'):
