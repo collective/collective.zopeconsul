@@ -22,9 +22,9 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     keywords='',
-    author='Dylan Jay',
+    author='Dylan Jay, Jon Pentland',
     author_email='software@pretaweb.com',
-    url='https://github.com/datakurre/collective.zopeconsul/',
+    url='https://github.com/collective/collective.zopeconsul/',
     license='GPL',
     packages=find_packages('src', exclude=['ez_setup']),
     package_dir={'': 'src'},
@@ -34,7 +34,6 @@ setup(
     install_requires=[
         'setuptools',
         'Zope2',
-        'five.globalrequest',
         'python-consul',
         'collective.monkeypatcher'
     ],
