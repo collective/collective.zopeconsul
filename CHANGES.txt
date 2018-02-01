@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.1-dev0 (unreleased)
----------------------
+0.1 (2018-02-01)
+----------------
 
 - Initial setup and vhm monkeypatching [djay]
 - Addition of zope-additional-configuration option [instification]
