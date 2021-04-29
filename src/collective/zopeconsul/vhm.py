@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from consulserver import Consul
 from transaction import get as get_transaction
 from transaction.interfaces import ISavepoint, ISavepointDataManager
 from zope.app.publication.zopepublication import ZopePublication
-from zope.interface import implements
+from zope.interface.declarations import implementer
+
+from .consulserver import Consul
 
 logger = logging.getLogger('collective.zopeconsul')
 
 _marker = object()
 
 
+@implementer(ISavepoint)
 class DummySavepoint:
-    implements(ISavepoint)
 
     valid = property(lambda self: self.transaction is not None)
 
@@ -24,9 +25,8 @@ class DummySavepoint:
         pass
 
 
+@implementer(ISavepointDataManager)
 class ConsulSendTransactionDataManager(object):
-
-    implements(ISavepointDataManager)
 
     _COUNTER = 0
 
