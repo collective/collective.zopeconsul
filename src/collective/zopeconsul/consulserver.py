@@ -1,7 +1,7 @@
 import logging
 import os
 import re
-from urllib.parse import urlsplit
+from six.moves.urllib.parse import urlsplit
 
 import consul
 from App.config import getConfiguration
