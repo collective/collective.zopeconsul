@@ -35,7 +35,8 @@ setup(
         'setuptools',
         'Zope2',
         'python-consul',
-        'collective.monkeypatcher'
+        'collective.monkeypatcher',
+        'zope.app.publication',
     ],
     extras_require={
         'test': ['plone.app.testing', 'plone.app.robotframework>=0.7.0rc4'],

@@ -1,7 +1,7 @@
 import logging
 import os
 import re
-from urlparse import urlsplit
+from six.moves.urllib.parse import urlsplit
 
 import consul
 from App.config import getConfiguration
@@ -37,10 +37,10 @@ class Consul(object):
         self.prefix defaults to zope
         """
         return "%s/%s%s" % (self.prefix.strip('/'),
-                             (self.instance is not None
-                              and 'instances/%s/' % self.instance
-                              or ''),
-                             name.strip('/'))
+                            (self.instance is not None
+                             and 'instances/%s/' % self.instance
+                             or ''),
+                            name.strip('/'))
 
 
 def set_keyvalues(event, consulsrv):

@@ -1,5 +1,5 @@
-from consulserver import Consul, set_keyvalues
-from vhm import set_vhm
+from .consulserver import Consul, set_keyvalues
+from .vhm import set_vhm
 
 
 def notifyStartup(event):
