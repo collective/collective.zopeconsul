@@ -4,7 +4,7 @@ Changelog
 0.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Create new CONSUL_IGNOREVHM option [instification]
 
 
 0.2 (2021-09-16)
