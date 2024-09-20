@@ -51,3 +51,7 @@ consul_ignore
     Skips setting consul key values. Useful if you have multiple instances that
     share the same code. You can set this value on specific instances and no
     key/values will be set in consul.
+
+consul_ignorevhm
+    Skips individual VHM hosts from being set. This should match the first part of the vhm string (i.e. before `/VirtualHostBase`)
+    e.g. `CONSUL_IGNOREVHM="test.localhost,test2.localhost"` which will prevent either of the corresponding vhm values being set in consul.
