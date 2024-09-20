@@ -90,7 +90,7 @@ def send_vhm(host_map, consul=None):
     old_values = server.kv.get(vhm, recurse=True)
     if old_values:
         server.kv.delete(vhm, recurse=True)
-    for host in host_map:
+    for host in [host for host in host_map if host not in consul.ignorevhm]:
         for nothing, values in host_map[host].items():
             server.kv.put('%s/%s' % (vhm, host), '%s' % '/'.join(values))
 

@@ -18,9 +18,10 @@ class Consul(object):
         self.server = consul.Consul(scheme=r.scheme,
                                     host=r.hostname,
                                     port=r.port)
-        self.instance = self.getconf('consul_instancename', None)
+        self.instance = self.getconf('consul_instancename')
         self.prefix = self.getconf('consul_prefix', 'zope/')
         self.ignore = self.getconf('consul_ignore', 0)
+        self.ignorevhm = self.getconf('consul_ignorevhm', "").split(',')
 
     def getconf(self, name, default=None):
         value = os.environ.get(name.upper(), None)
