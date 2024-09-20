@@ -84,15 +84,24 @@ def send_vhm(host_map, consul=None):
     if consul.ignore:
         logger.info('Not setting vhm values in consul (CONSUL_IGNORE = 1)')
         return
-    logger.info('Setting consul vhm values')
+    logger.info('Checking consul vhm values')
     server = consul.server
     vhm = consul.key_base('vhm')
     old_values = server.kv.get(vhm, recurse=True)
+    oldvals = None
     if old_values:
-        server.kv.delete(vhm, recurse=True)
+        oldvals = {x['Key']: x['Value'] for x in old_values[1]}
+    newvals = {}
     for host in [host for host in host_map if host not in consul.ignorevhm]:
         for nothing, values in host_map[host].items():
-            server.kv.put('%s/%s' % (vhm, host), '%s' % '/'.join(values))
+            newvals['%s/%s' % (vhm,host)] = '/'.join(values)
+
+    # Check if the values are the different before overwriting
+    if oldvals != newvals:
+        logger.info('Setting new consul vhm values')
+        server.kv.delete(vhm, recurse=True)
+        for val in newvals.items():
+            server.kv.put(val[0], val[1])
 
 
 # need to monkey patch VHM as there are no events
