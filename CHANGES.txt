@@ -5,6 +5,7 @@ Changelog
 ----------------
 
 - Create new CONSUL_IGNOREVHM option [instification]
+- Only update VHM values if they differ from consul [instification]
 
 
 0.2 (2021-09-16)
