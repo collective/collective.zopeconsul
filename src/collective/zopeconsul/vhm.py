@@ -89,7 +89,7 @@ def send_vhm(host_map, consul=None):
     vhm = consul.key_base('vhm')
     old_values = server.kv.get(vhm, recurse=True)
     oldvals = None
-    if old_values:
+    if old_values and isinstance(old_values, list):
         oldvals = {x['Key']: x['Value'] for x in old_values[1]}
     newvals = {}
     for host in [host for host in host_map if host not in consul.ignorevhm]:
